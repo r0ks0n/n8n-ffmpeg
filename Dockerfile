@@ -1,17 +1,18 @@
+# Uporabi Alpine varianto n8n :latest
 FROM n8nio/n8n:latest
 
-# Install ffmpeg (in optional: curl, wget) on Debian-slim base
+# Preklopi na root, da lahko dodaš pakete
 USER root
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
+
+# Namesti ffmpeg + dodatna orodja
+RUN apk add --no-cache \
     ffmpeg \
     curl \
     wget \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+    bash
 
-# (Optional) quick sanity check; harmless if fails
-RUN which ffmpeg && ffmpeg -version || true
+# (opcijsko) preveri, da je ffmpeg na voljo
+RUN ffmpeg -version || true
 
-# Back to non-root for security (same as official image)
+# Varnost: nazaj na default n8n user
 USER node
