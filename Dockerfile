@@ -1,10 +1,8 @@
-# Uporabi Alpine varianto n8n :latest
+# Alpine varianta n8n
 FROM n8nio/n8n:latest
 
-# Preklopi na root, da lahko dodaš pakete
+# 1) Sistemski paketi
 USER root
-
-# Namesti ffmpeg + dodatna orodja
 RUN apk add --no-cache \
     ffmpeg \
     curl \
@@ -13,15 +11,16 @@ RUN apk add --no-cache \
     ttf-dejavu \
     ttf-freefont
 
-# Varnost: nazaj na default n8n user
-USER node
+# 2) Pripravi /data in lastništvo, da lahko node tja piše
+RUN mkdir -p /data && chown -R node:node /data
 
-# Namesti pdf-lib in pdfme v /data (persistent modul folder)
+# 3) Nazaj na 'node' in namesti npm module v /data
+USER node
 RUN npm install --prefix /data --omit=dev pdf-lib pdfme
 
-# Naj Node najde te module
+# 4) Naj Node najde module iz /data
 ENV NODE_PATH=/data/node_modules
 
-# Omogoči module v n8n Code/Function node
+# 5) Dovoli external modules v n8n Code/Function node
 ENV NODE_FUNCTION_ALLOW_EXTERNAL=pdf-lib,pdfme \
     NODE_FUNCTION_EXTERNAL_MODULES=pdf-lib,pdfme
