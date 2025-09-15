@@ -1,7 +1,6 @@
-# Alpine varianta n8n
 FROM n8nio/n8n:latest
 
-# 1) Sistemski paketi
+# 1) Sistemski paketi (Alpine)
 USER root
 RUN apk add --no-cache \
     ffmpeg \
@@ -11,16 +10,16 @@ RUN apk add --no-cache \
     ttf-dejavu \
     ttf-freefont
 
-# 2) Pripravi /data in lastništvo, da lahko node tja piše
+# 2) Pripravi /data in lastništvo
 RUN mkdir -p /data && chown -R node:node /data
 
-# 3) Nazaj na 'node' in namesti npm module v /data
+# 3) Namesti NPM module v /data kot 'node'
 USER node
-RUN npm install --prefix /data --omit=dev pdf-lib pdfme
+# (po želji dodaš registry pin, ni nujno)
+# RUN npm config set registry https://registry.npmjs.org/
+RUN npm install --prefix /data --omit=dev pdf-lib @pdfme/generator
 
-# 4) Naj Node najde module iz /data
+# 4) Naj Node najde module + dovoli external modules v n8n
 ENV NODE_PATH=/data/node_modules
-
-# 5) Dovoli external modules v n8n Code/Function node
-ENV NODE_FUNCTION_ALLOW_EXTERNAL=pdf-lib,pdfme \
-    NODE_FUNCTION_EXTERNAL_MODULES=pdf-lib,pdfme
+ENV NODE_FUNCTION_ALLOW_EXTERNAL=pdf-lib,@pdfme/generator \
+    NODE_FUNCTION_EXTERNAL_MODULES=pdf-lib,@pdfme/generator
