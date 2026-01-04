@@ -1,18 +1,17 @@
-# Uporabi Alpine varianto n8n :latest
 FROM n8nio/n8n:latest
 
-# Preklopi na root, da lahko dodaš pakete
 USER root
 
-# Namesti ffmpeg + dodatna orodja
-RUN apk add --no-cache \
-    ffmpeg \
-    curl \
-    wget \
-    bash
+RUN set -eux; \
+  if command -v apk >/dev/null 2>&1; then \
+    apk add --no-cache ffmpeg curl wget bash; \
+  elif command -v apt-get >/dev/null 2>&1; then \
+    apt-get update && apt-get install -y --no-install-recommends ffmpeg curl wget bash \
+    && rm -rf /var/lib/apt/lists/*; \
+  else \
+    echo "Unsupported base image (no apk or apt-get)"; exit 1; \
+  fi
 
-# (opcijsko) preveri, da je ffmpeg na voljo
 RUN ffmpeg -version || true
 
-# Varnost: nazaj na default n8n user
 USER node
