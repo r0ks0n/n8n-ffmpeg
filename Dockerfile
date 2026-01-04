@@ -1,17 +1,17 @@
-FROM n8nio/n8n:latest
+# 1) Stage: vzemi ffmpeg binarke iz Alpine (lahko tudi Debian)
+FROM alpine:3.20 AS ffmpeg_stage
+RUN apk add --no-cache ffmpeg
+
+# 2) Stage: tvoj n8n (distroless / brez apk/apt)
+FROM docker.io/n8nio/n8n:latest
 
 USER root
 
-RUN set -eux; \
-  if command -v apk >/dev/null 2>&1; then \
-    apk add --no-cache ffmpeg curl wget bash; \
-  elif command -v apt-get >/dev/null 2>&1; then \
-    apt-get update && apt-get install -y --no-install-recommends ffmpeg curl wget bash \
-    && rm -rf /var/lib/apt/lists/*; \
-  else \
-    echo "Unsupported base image (no apk or apt-get)"; exit 1; \
-  fi
+# Skopiraj ffmpeg + ffprobe binarke
+COPY --from=ffmpeg_stage /usr/bin/ffmpeg /usr/local/bin/ffmpeg
+COPY --from=ffmpeg_stage /usr/bin/ffprobe /usr/local/bin/ffprobe
 
-RUN ffmpeg -version || true
+# (opcijsko) če ima image shell, to preveri, ampak ne rabiš
+# RUN /usr/local/bin/ffmpeg -version || true
 
 USER node
