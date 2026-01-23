@@ -7,12 +7,12 @@ USER root
 COPY --from=ffmpeg_stage /ffmpeg /usr/local/bin/ffmpeg
 COPY --from=ffmpeg_stage /ffprobe /usr/local/bin/ffprobe
 
-# Instaliraj GraphicsMagick, ImageMagick in fonte
-RUN apk add --no-cache \
+# Instaliraj GraphicsMagick, ImageMagick in fonte (Debian/Ubuntu)
+RUN apt-get update && apt-get install -y \
     graphicsmagick \
     imagemagick \
-    imagemagick-dev \
-    ttf-dejavu \
-    fontconfig
+    fonts-dejavu-core \
+    fontconfig \
+    && rm -rf /var/lib/apt/lists/*
 
 USER node
